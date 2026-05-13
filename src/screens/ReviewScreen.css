@@ -249,12 +249,88 @@
 /* Footer */
 .review-footer {
   text-align: center;
-  padding: 0 0 64px;
+  margin-top: 3rem;
 }
 
 .review-approve-btn {
-  font-size: 16px;
-  padding: 16px 48px;
+  font-size: 1.1rem;
+  padding: 1rem 3rem;
+  border-radius: 50px;
+}
+
+/* Edit Form Styles */
+.qc-edit-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.edit-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.edit-select,
+.edit-input,
+.edit-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-main);
+  padding: 0.5rem 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}
+
+.edit-select:focus,
+.edit-input:focus,
+.edit-textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.edit-select option {
+  background: var(--bg-dark);
+}
+
+.topic-input {
+  flex: 1;
+}
+
+.edit-textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.edit-actions button {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+.add-question-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.add-q-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+}
+
+.add-q-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--text-main);
 }
 
 @media (max-width: 900px) {

@@ -21,11 +21,17 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
   const [expandedAnswer, setExpandedAnswer] = useState({});
   const [rejectMenu, setRejectMenu] = useState(null);
   const [regenerating, setRegenerating] = useState({});
+  
+  // Edit & Add state
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState(null);
 
   const approved = questions.filter(q => !q.rejected).length;
   const total = questions.length;
 
   const toggleAnswer = (id) => {
+    // Don't toggle if currently editing this question
+    if (editingId === id) return;
     setExpandedAnswer(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -67,6 +73,45 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
       'Rephrase it': `In your own words, ${q.question.charAt(0).toLowerCase()}${q.question.slice(1)}`,
     };
     return prefixes[reason] || q.question;
+  };
+
+  const handleEdit = (q) => {
+    setEditingId(q.id);
+    setEditForm({ ...q });
+    setExpandedAnswer(prev => ({ ...prev, [q.id]: true })); // Expand answer for editing
+  };
+
+  const handleSaveEdit = () => {
+    setQuestions(prev => prev.map(q => q.id === editingId ? editForm : q));
+    setEditingId(null);
+    setEditForm(null);
+  };
+
+  const handleCancelEdit = () => {
+    // If it was a newly added blank question, remove it on cancel
+    if (editForm && editForm.question.trim() === '') {
+      setQuestions(prev => prev.filter(q => q.id !== editingId));
+    }
+    setEditingId(null);
+    setEditForm(null);
+  };
+
+  const handleAddQuestion = () => {
+    const newId = 'manual_' + Date.now();
+    const newQ = {
+      id: newId,
+      level: 'Remember',
+      marks: 2,
+      topic: 'Custom Topic',
+      question: '',
+      answer: '',
+      rejected: false,
+      rejectionReason: null
+    };
+    setQuestions(prev => [...prev, newQ]);
+    setEditingId(newId);
+    setEditForm(newQ);
+    setExpandedAnswer(prev => ({ ...prev, [newId]: true }));
   };
 
   return (
@@ -117,6 +162,9 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
                   {q.rejectionReason && (
                     <span className="chip chip-orange">↻ Regenerated: {q.rejectionReason}</span>
                   )}
+                  <button className="btn-secondary" onClick={() => handleEdit(q)}>
+                    ✏️ Edit
+                  </button>
                   <div className="reject-wrap">
                     <button
                       className="btn-danger"
@@ -139,20 +187,74 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
               )}
             </div>
 
-            <p className="qc-question">{q.question}</p>
-
-            <button className="answer-toggle" onClick={() => toggleAnswer(q.id)}>
-              {expandedAnswer[q.id] ? '▲ Hide Answer Key' : '▼ Show Answer Key'}
-            </button>
-
-            {expandedAnswer[q.id] && (
-              <div className="answer-box animate-fade">
-                <div className="answer-label">✦ Model Answer</div>
-                <p className="answer-text">{q.answer}</p>
+            {editingId === q.id ? (
+              <div className="qc-edit-form">
+                <div className="edit-row">
+                  <select 
+                    value={editForm.level} 
+                    onChange={e => setEditForm({...editForm, level: e.target.value})}
+                    className="edit-select"
+                  >
+                    {Object.keys(LEVEL_COLORS).map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                  <input 
+                    type="number" 
+                    value={editForm.marks} 
+                    onChange={e => setEditForm({...editForm, marks: parseInt(e.target.value) || 0})}
+                    className="edit-input marks-input"
+                    min="1"
+                  />
+                  <input 
+                    type="text" 
+                    value={editForm.topic} 
+                    onChange={e => setEditForm({...editForm, topic: e.target.value})}
+                    className="edit-input topic-input"
+                    placeholder="Topic..."
+                  />
+                </div>
+                <textarea 
+                  value={editForm.question} 
+                  onChange={e => setEditForm({...editForm, question: e.target.value})}
+                  className="edit-textarea"
+                  placeholder="Question text..."
+                  rows={2}
+                />
+                <textarea 
+                  value={editForm.answer} 
+                  onChange={e => setEditForm({...editForm, answer: e.target.value})}
+                  className="edit-textarea"
+                  placeholder="Model answer..."
+                  rows={3}
+                />
+                <div className="edit-actions">
+                  <button className="btn-primary" onClick={handleSaveEdit}>Save Changes</button>
+                  <button className="btn-secondary" onClick={handleCancelEdit}>Cancel</button>
+                </div>
               </div>
+            ) : (
+              <>
+                <p className="qc-question">{q.question}</p>
+
+                <button className="answer-toggle" onClick={() => toggleAnswer(q.id)}>
+                  {expandedAnswer[q.id] ? '▲ Hide Answer Key' : '▼ Show Answer Key'}
+                </button>
+
+                {expandedAnswer[q.id] && (
+                  <div className="answer-box animate-fade">
+                    <div className="answer-label">✦ Model Answer</div>
+                    <p className="answer-text">{q.answer}</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         ))}
+      </div>
+
+      <div className="add-question-wrap">
+        <button className="btn-secondary add-q-btn" onClick={handleAddQuestion}>
+          + Add Custom Question
+        </button>
       </div>
 
       <div className="review-footer">

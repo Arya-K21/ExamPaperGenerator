@@ -1,0 +1,211 @@
+.audit-screen {
+  min-height: 100vh;
+  padding: 48px 64px;
+  position: relative;
+  overflow: hidden;
+}
+
+.audit-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.audit-badge { margin: 0 auto 16px; width: fit-content; }
+
+.audit-header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.audit-header p { color: var(--text-secondary); font-size: 16px; }
+
+.audit-body {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Metric cards */
+.audit-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.metric-card {
+  padding: 24px 16px;
+  text-align: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.metric-card.ok { border-color: rgba(16,185,129,0.3); }
+.metric-card.warn { border-color: rgba(245,158,11,0.3); }
+.metric-card.neutral { border-color: var(--border); }
+
+.mc-icon { font-size: 26px; margin-bottom: 12px; }
+
+.mc-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.mc-value.ok { color: var(--accent-green); }
+.mc-value.warn { color: var(--accent-orange); }
+.mc-value.neutral { color: var(--accent-primary); }
+
+.mc-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.mc-sub { font-size: 11px; color: var(--text-muted); }
+
+/* Warning */
+.audit-warning {
+  padding: 24px;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  background: rgba(245, 158, 11, 0.05) !important;
+}
+
+.warn-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.warn-icon { font-size: 24px; flex-shrink: 0; }
+
+.warn-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--accent-orange);
+}
+
+.warn-header p { font-size: 13px; color: var(--text-secondary); }
+
+.warn-topics { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Audit sections */
+.audit-section {
+  padding: 28px 32px;
+}
+
+.audit-section h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.audit-section-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+/* Bloom bars */
+.bloom-bars { display: flex; flex-direction: column; gap: 16px; }
+
+.bloom-bar-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 44px;
+  align-items: center;
+  gap: 16px;
+}
+
+.bloom-bar-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bloom-bar-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bloom-bar-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.bloom-bar-track {
+  height: 8px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bloom-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s ease;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.bloom-bar-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* Agent note */
+.agent-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border-color: rgba(79,142,247,0.25) !important;
+  background: rgba(79,142,247,0.04) !important;
+}
+
+.agent-icon {
+  width: 40px; height: 40px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.agent-note h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--accent-primary);
+}
+
+.agent-note p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.agent-note strong { color: var(--text-primary); }
+
+/* Actions */
+.audit-actions {
+  text-align: center;
+  padding-bottom: 48px;
+}
+
+.audit-cta {
+  font-size: 16px;
+  padding: 16px 40px;
+  margin-bottom: 12px;
+}
+
+.audit-note {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .audit-screen { padding: 24px 20px; }
+  .audit-metrics { grid-template-columns: repeat(2, 1fr); }
+  .bloom-bar-row { grid-template-columns: 140px 1fr 40px; }
+}

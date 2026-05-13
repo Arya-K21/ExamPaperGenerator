@@ -1,0 +1,192 @@
+.landing {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Background orbs */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, #4f8ef7, transparent);
+  top: -200px; left: -150px;
+  animation: float 8s ease-in-out infinite;
+}
+.orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, #7c3aed, transparent);
+  top: 30%; right: -150px;
+  animation: float 10s ease-in-out infinite reverse;
+}
+.orb-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, #10b981, transparent);
+  bottom: -100px; left: 30%;
+  animation: float 12s ease-in-out infinite;
+}
+
+/* Nav */
+.landing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 64px;
+  position: relative;
+  z-index: 10;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--gradient-primary);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+/* Main */
+.landing-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+  padding: 40px 64px 80px;
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-tag {
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.hero-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(36px, 4vw, 58px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 17px;
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: 1.75;
+  margin-bottom: 36px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 60px;
+  flex-wrap: wrap;
+}
+
+.hero-cta {
+  font-size: 16px;
+  padding: 16px 36px;
+}
+
+/* Stats */
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stat-card {
+  padding: 20px 16px;
+  text-align: center;
+  opacity: 0;
+}
+
+.stat-icon { font-size: 22px; margin-bottom: 8px; }
+.stat-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+/* Visual card */
+.landing-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.float-card {
+  animation: float 6s ease-in-out infinite;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+}
+
+.vc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.vc-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+.vc-dot.green { background: var(--accent-green); }
+.vc-dot.yellow { background: var(--accent-orange); }
+.vc-dot.red { background: var(--accent-red); }
+
+.vc-rows { display: flex; flex-direction: column; gap: 12px; }
+
+.vc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.vc-label { font-size: 13px; color: var(--text-secondary); }
+.vc-val { font-size: 12px; font-weight: 600; }
+.vc-val.ok { color: var(--accent-green); }
+.vc-val.warn { color: var(--accent-orange); }
+.vc-val.neutral { color: var(--accent-primary); }
+
+@media (max-width: 900px) {
+  .landing-main { grid-template-columns: 1fr; padding: 24px 24px 60px; }
+  .landing-nav { padding: 20px 24px; }
+  .landing-visual { display: none; }
+  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+}

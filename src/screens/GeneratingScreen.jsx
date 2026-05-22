@@ -3,7 +3,7 @@ import { generatePaper } from '../api/client';
 import { getMockAudit, getMockQuestions, detectSubject } from '../data/mockData';
 import './GeneratingScreen.css';
 
-const STEPS = [
+const STANDARD_STEPS = [
   { icon: '📄', label: 'Parsing syllabus and extracting topics...', duration: 1800 },
   { icon: '🧠', label: "Mapping topics to Bloom's taxonomy levels...", duration: 1600 },
   { icon: '✍️', label: 'Generating questions with Gemini agent...', duration: 2400 },
@@ -12,9 +12,18 @@ const STEPS = [
   { icon: '📊', label: 'Auditing coverage and balance...', duration: 1000 },
 ];
 
-const TOTAL_ANIMATION_MS = STEPS.reduce((a, s) => a + s.duration, 0) + 400;
+const BACKLOG_STEPS = [
+  { icon: '📄', label: 'Analyzing previous semester exam paper...', duration: 1800 },
+  { icon: '🧠', label: "Mapping to Bloom's taxonomy & difficulty levels...", duration: 1600 },
+  { icon: '✍️', label: 'Re-imagining and generating related exam questions...', duration: 2400 },
+  { icon: '🔑', label: 'Creating answer keys for new questions...', duration: 1600 },
+  { icon: '🔍', label: 'Ensuring non-repetition & originality checks...', duration: 1400 },
+  { icon: '📊', label: 'Auditing coverage against syllabus...', duration: 1000 },
+];
 
 export default function GeneratingScreen({ config, onDone }) {
+  const steps = config?.isBacklog ? BACKLOG_STEPS : STANDARD_STEPS;
+
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState([]);
   const [error, setError] = useState(null);
@@ -34,7 +43,7 @@ export default function GeneratingScreen({ config, onDone }) {
   useEffect(() => {
     let step = 0;
     const advance = () => {
-      if (step >= STEPS.length) {
+      if (step >= steps.length) {
         animDoneRef.current = true;
         tryResolve();
         return;
@@ -45,7 +54,7 @@ export default function GeneratingScreen({ config, onDone }) {
         setCompleted(prev => [...prev, s]);
         step = s + 1;
         advance();
-      }, STEPS[s].duration);
+      }, steps[s].duration);
     };
     const t = setTimeout(advance, 400);
     return () => clearTimeout(t);
@@ -59,7 +68,9 @@ export default function GeneratingScreen({ config, onDone }) {
       return;
     }
 
-    generatePaper(config.syllabus, config.levels)
+    const backlogText = config.isBacklog ? config.backlogText : null;
+
+    generatePaper(config.syllabus, config.levels, backlogText)
       .then((result) => {
         apiResultRef.current = result;
       })
@@ -79,7 +90,7 @@ export default function GeneratingScreen({ config, onDone }) {
       });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const progress = Math.round((completed.length / STEPS.length) * 100);
+  const progress = Math.round((completed.length / steps.length) * 100);
 
   return (
     <div className="gen-screen">
@@ -104,7 +115,7 @@ export default function GeneratingScreen({ config, onDone }) {
         </div>
 
         <div className="steps-list">
-          {STEPS.map((step, i) => {
+          {steps.map((step, i) => {
             const isDone = completed.includes(i);
             const isActive = currentStep === i;
             return (

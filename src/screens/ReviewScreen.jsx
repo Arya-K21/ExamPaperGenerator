@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getMockQuestions } from '../data/mockData';
 import { regenerateQuestion } from '../api/client';
+import { saveQuestionToBank } from './QuestionBankScreen';
 import './ReviewScreen.css';
 
 const LEVEL_COLORS = {
@@ -21,6 +22,8 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
   const [expandedAnswer, setExpandedAnswer] = useState({});
   const [rejectMenu, setRejectMenu] = useState(null);
   const [regenerating, setRegenerating] = useState({});
+  const [activeVariants, setActiveVariants] = useState({});
+  const [savedToBank, setSavedToBank] = useState({});
   
   // Edit & Add state
   const [editingId, setEditingId] = useState(null);
@@ -77,7 +80,11 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
 
   const handleEdit = (q) => {
     setEditingId(q.id);
-    setEditForm({ ...q });
+    setEditForm({
+      ...q,
+      scaffolded_question: q.scaffolded_question || '',
+      advanced_question: q.advanced_question || '',
+    });
     setExpandedAnswer(prev => ({ ...prev, [q.id]: true })); // Expand answer for editing
   };
 
@@ -104,6 +111,8 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
       marks: 2,
       topic: 'Custom Topic',
       question: '',
+      scaffolded_question: '',
+      advanced_question: '',
       answer: '',
       rejected: false,
       rejectionReason: null
@@ -112,6 +121,16 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
     setEditingId(newId);
     setEditForm(newQ);
     setExpandedAnswer(prev => ({ ...prev, [newId]: true }));
+  };
+
+  const handleApproveClick = () => {
+    const approvedList = questions
+      .filter(q => !q.rejected)
+      .map(q => ({
+        ...q,
+        selectedVariant: activeVariants[q.id] || 'standard'
+      }));
+    onApprove(approvedList);
   };
 
   return (
@@ -123,7 +142,7 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
         <div className="review-topbar-inner">
           <div>
             <h1 className="review-title">Review <span className="gradient-text">Questions</span></h1>
-            <p className="review-sub">Reject any question to have the agent regenerate it</p>
+            <p className="review-sub">Select variant options and reject any question to regenerate</p>
           </div>
           <div className="review-progress-info">
             <div className="review-progress-bar">
@@ -133,7 +152,7 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
           </div>
           <button
             className="btn-primary"
-            onClick={() => onApprove(questions.filter(q => !q.rejected))}
+            onClick={handleApproveClick}
           >
             Approve & Download →
           </button>
@@ -142,113 +161,184 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
 
       {/* Questions */}
       <div className="questions-list">
-        {questions.map((q, i) => (
-          <div key={q.id} className={`question-card glass-card ${q.rejected ? 'rejected' : ''} ${regenerating[q.id] ? 'regenerating' : ''}`}>
-            <div className="qc-header">
-              <div className="qc-meta">
-                <span className="qc-num">Q{i + 1}</span>
-                <span className={`chip ${LEVEL_COLORS[q.level] || 'chip-blue'}`}>{q.level}</span>
-                <span className="chip chip-green">{q.marks} marks</span>
-                <span className="qc-topic">📌 {q.topic}</span>
-              </div>
+        {questions.map((q, i) => {
+          const currentVariant = activeVariants[q.id] || 'standard';
+          
+          let displayedQuestion = q.question;
+          if (currentVariant === 'scaffolded') {
+            displayedQuestion = q.scaffolded_question || q.question;
+          } else if (currentVariant === 'advanced') {
+            displayedQuestion = q.advanced_question || q.question;
+          }
 
-              {regenerating[q.id] ? (
-                <div className="regenerating-badge">
-                  <span className="regen-spinner" />
-                  <span>Regenerating...</span>
+          return (
+            <div key={q.id} className={`question-card glass-card ${q.rejected ? 'rejected' : ''} ${regenerating[q.id] ? 'regenerating' : ''}`}>
+              <div className="qc-header">
+                <div className="qc-meta">
+                  <span className="qc-num">Q{i + 1}</span>
+                  <span className={`chip ${LEVEL_COLORS[q.level] || 'chip-blue'}`}>{q.level}</span>
+                  <span className="chip chip-green">{q.marks} marks</span>
+                  <span className="qc-topic">📌 {q.topic}</span>
                 </div>
-              ) : (
-                <div className="qc-actions">
-                  {q.rejectionReason && (
-                    <span className="chip chip-orange">↻ Regenerated: {q.rejectionReason}</span>
-                  )}
-                  <button className="btn-secondary" onClick={() => handleEdit(q)}>
-                    ✏️ Edit
-                  </button>
-                  <div className="reject-wrap">
-                    <button
-                      className="btn-danger"
-                      onClick={() => setRejectMenu(rejectMenu === q.id ? null : q.id)}
-                    >
-                      👎 Reject
-                    </button>
-                    {rejectMenu === q.id && (
-                      <div className="reject-dropdown">
-                        <p className="reject-dropdown-label">Why are you rejecting?</p>
-                        {REJECT_REASONS.map(r => (
-                          <button key={r} className="reject-option" onClick={() => handleReject(q.id, r)}>
-                            {r}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+
+                {regenerating[q.id] ? (
+                  <div className="regenerating-badge">
+                    <span className="regen-spinner" />
+                    <span>Regenerating...</span>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {editingId === q.id ? (
-              <div className="qc-edit-form">
-                <div className="edit-row">
-                  <select 
-                    value={editForm.level} 
-                    onChange={e => setEditForm({...editForm, level: e.target.value})}
-                    className="edit-select"
-                  >
-                    {Object.keys(LEVEL_COLORS).map(l => <option key={l} value={l}>{l}</option>)}
-                  </select>
-                  <input 
-                    type="number" 
-                    value={editForm.marks} 
-                    onChange={e => setEditForm({...editForm, marks: parseInt(e.target.value) || 0})}
-                    className="edit-input marks-input"
-                    min="1"
-                  />
-                  <input 
-                    type="text" 
-                    value={editForm.topic} 
-                    onChange={e => setEditForm({...editForm, topic: e.target.value})}
-                    className="edit-input topic-input"
-                    placeholder="Topic..."
-                  />
-                </div>
-                <textarea 
-                  value={editForm.question} 
-                  onChange={e => setEditForm({...editForm, question: e.target.value})}
-                  className="edit-textarea"
-                  placeholder="Question text..."
-                  rows={2}
-                />
-                <textarea 
-                  value={editForm.answer} 
-                  onChange={e => setEditForm({...editForm, answer: e.target.value})}
-                  className="edit-textarea"
-                  placeholder="Model answer..."
-                  rows={3}
-                />
-                <div className="edit-actions">
-                  <button className="btn-primary" onClick={handleSaveEdit}>Save Changes</button>
-                  <button className="btn-secondary" onClick={handleCancelEdit}>Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="qc-question">{q.question}</p>
-
-                <button className="answer-toggle" onClick={() => toggleAnswer(q.id)}>
-                  {expandedAnswer[q.id] ? '▲ Hide Answer Key' : '▼ Show Answer Key'}
-                </button>
-
-                {expandedAnswer[q.id] && (
-                  <div className="answer-box animate-fade">
-                    <div className="answer-label">✦ Model Answer</div>
-                    <p className="answer-text">{q.answer}</p>
+                ) : (
+                  <div className="qc-actions">
+                    {q.rejectionReason && (
+                      <span className="chip chip-orange">↻ Regenerated: {q.rejectionReason}</span>
+                    )}
+                    <button className="btn-secondary" onClick={() => handleEdit(q)}>
+                      ✏️ Edit
+                    </button>
+                    <div className="reject-wrap">
+                      <button
+                        className="btn-danger"
+                        onClick={() => setRejectMenu(rejectMenu === q.id ? null : q.id)}
+                      >
+                        👎 Reject
+                      </button>
+                      {rejectMenu === q.id && (
+                        <div className="reject-dropdown">
+                          <p className="reject-dropdown-label">Why are you rejecting?</p>
+                          {REJECT_REASONS.map(r => (
+                            <button key={r} className="reject-option" onClick={() => handleReject(q.id, r)}>
+                              {r}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-              </>
-            )}
-          </div>
-        ))}
+              </div>
+
+              {editingId === q.id ? (
+                <div className="qc-edit-form">
+                  <div className="edit-row">
+                    <select 
+                      value={editForm.level} 
+                      onChange={e => setEditForm({...editForm, level: e.target.value})}
+                      className="edit-select"
+                    >
+                      {Object.keys(LEVEL_COLORS).map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                    <input 
+                      type="number" 
+                      value={editForm.marks} 
+                      onChange={e => setEditForm({...editForm, marks: parseInt(e.target.value) || 0})}
+                      className="edit-input marks-input"
+                      min="1"
+                    />
+                    <input 
+                      type="text" 
+                      value={editForm.topic} 
+                      onChange={e => setEditForm({...editForm, topic: e.target.value})}
+                      className="edit-input topic-input"
+                      placeholder="Topic..."
+                    />
+                  </div>
+                  <div className="edit-textarea-group">
+                    <label>Standard Question Text</label>
+                    <textarea 
+                      value={editForm.question} 
+                      onChange={e => setEditForm({...editForm, question: e.target.value})}
+                      className="edit-textarea"
+                      placeholder="Standard question text..."
+                      rows={2}
+                    />
+                  </div>
+                  <div className="edit-textarea-group">
+                    <label>Scaffolded Question Text (for guided learning)</label>
+                    <textarea 
+                      value={editForm.scaffolded_question} 
+                      onChange={e => setEditForm({...editForm, scaffolded_question: e.target.value})}
+                      className="edit-textarea"
+                      placeholder="Scaffolded question text..."
+                      rows={2}
+                    />
+                  </div>
+                  <div className="edit-textarea-group">
+                    <label>Advanced Question Text (higher rigor)</label>
+                    <textarea 
+                      value={editForm.advanced_question} 
+                      onChange={e => setEditForm({...editForm, advanced_question: e.target.value})}
+                      className="edit-textarea"
+                      placeholder="Advanced question text..."
+                      rows={2}
+                    />
+                  </div>
+                  <div className="edit-textarea-group">
+                    <label>Model Answer</label>
+                    <textarea 
+                      value={editForm.answer} 
+                      onChange={e => setEditForm({...editForm, answer: e.target.value})}
+                      className="edit-textarea"
+                      placeholder="Model answer..."
+                      rows={3}
+                    />
+                  </div>
+                  <div className="edit-actions">
+                    <button className="btn-primary" onClick={handleSaveEdit}>Save Changes</button>
+                    <button className="btn-secondary" onClick={handleCancelEdit}>Cancel</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="variant-tab-container">
+                    <button 
+                      className={`variant-tab-btn ${currentVariant === 'standard' ? 'active' : ''}`}
+                      onClick={() => setActiveVariants(prev => ({ ...prev, [q.id]: 'standard' }))}
+                    >
+                      📋 Standard
+                    </button>
+                    <button 
+                      className={`variant-tab-btn ${currentVariant === 'scaffolded' ? 'active' : ''}`}
+                      onClick={() => setActiveVariants(prev => ({ ...prev, [q.id]: 'scaffolded' }))}
+                    >
+                      🪜 Scaffolded
+                    </button>
+                    <button 
+                      className={`variant-tab-btn ${currentVariant === 'advanced' ? 'active' : ''}`}
+                      onClick={() => setActiveVariants(prev => ({ ...prev, [q.id]: 'advanced' }))}
+                    >
+                      🚀 Advanced
+                    </button>
+                  </div>
+
+                  <p className="qc-question">{displayedQuestion}</p>
+
+                  <div className="qc-bottom-row">
+                    <button className="answer-toggle" onClick={() => toggleAnswer(q.id)}>
+                      {expandedAnswer[q.id] ? '▲ Hide Answer Key' : '▼ Show Answer Key'}
+                    </button>
+                    <button
+                      className={`save-bank-btn ${savedToBank[q.id] ? 'saved' : ''}`}
+                      onClick={() => {
+                        const ok = saveQuestionToBank(q);
+                        setSavedToBank(prev => ({ ...prev, [q.id]: true }));
+                        if (!ok) { /* already saved */ }
+                      }}
+                      disabled={savedToBank[q.id]}
+                    >
+                      {savedToBank[q.id] ? '✓ Saved to Bank' : '💾 Save to Bank'}
+                    </button>
+                  </div>
+
+                  {expandedAnswer[q.id] && (
+                    <div className="answer-box animate-fade">
+                      <div className="answer-label">✦ Model Answer</div>
+                      <p className="answer-text">{q.answer}</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="add-question-wrap">
@@ -258,7 +348,7 @@ export default function ReviewScreen({ onApprove, questions: questionsProp, syll
       </div>
 
       <div className="review-footer">
-        <button className="btn-primary review-approve-btn" onClick={() => onApprove(questions.filter(q => !q.rejected))}>
+        <button className="btn-primary review-approve-btn" onClick={handleApproveClick}>
           ✅ Approve Paper & Download →
         </button>
       </div>

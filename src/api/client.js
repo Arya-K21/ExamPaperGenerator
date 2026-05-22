@@ -17,10 +17,10 @@ async function request(path, options = {}) {
  * @param {string} syllabus - syllabus text
  * @param {Array}  levels   - [{id, label, count, marks}, ...]
  */
-export async function generatePaper(syllabus, levels) {
+export async function generatePaper(syllabus, levels, backlogText = null) {
   return request('/api/generate', {
     method: 'POST',
-    body: JSON.stringify({ syllabus, levels }),
+    body: JSON.stringify({ syllabus, levels, backlog_text: backlogText }),
   });
 }
 
@@ -57,4 +57,11 @@ export async function parsePdf(file) {
     throw new Error(err.detail || `HTTP ${res.status}`);
   }
   return res.json(); // { text: "..." }
+}
+
+export async function parseVoiceCommand(transcript) {
+  return request('/api/parse-voice-command', {
+    method: 'POST',
+    body: JSON.stringify({ transcript }),
+  });
 }

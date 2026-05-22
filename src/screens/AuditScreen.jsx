@@ -110,9 +110,11 @@ export default function AuditScreen({ onProceed, audit: auditProp, syllabus }) {
           <div>
             <h3>Agent Summary</h3>
             <p>
-              Generated <strong>{audit.totalQuestions} questions</strong> across <strong>{audit.distribution.length} Bloom's levels</strong> for <strong>{audit.topicsCovered} topics</strong>.
-              One topic ({audit.missedTopics[0]}) had insufficient syllabus content for question generation.
-              All questions passed originality checks. Estimated difficulty is <strong>{audit.difficulty}</strong>.
+              Generated <strong>{audit.totalQuestions} questions</strong> across <strong>{audit.distribution.length} Bloom&apos;s levels</strong> for <strong>{audit.topicsCovered} topics</strong>.
+              {audit.missedTopics?.length > 0
+                ? ` The topic "${audit.missedTopics[0]}" had insufficient syllabus content for question generation.`
+                : ' All syllabus topics were covered successfully.'}
+              {' '}All questions passed originality checks. Estimated difficulty is <strong>{audit.difficulty}</strong>.
             </p>
           </div>
         </div>

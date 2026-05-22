@@ -203,6 +203,16 @@
   margin-bottom: 16px;
 }
 
+/* Bottom row: answer toggle + save to bank */
+.qc-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
 /* Answer toggle */
 .answer-toggle {
   background: none;
@@ -219,6 +229,35 @@
 .answer-toggle:hover {
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+/* Save to bank button */
+.save-bank-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  border-radius: var(--radius-sm);
+  color: #a78bfa;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.save-bank-btn:hover:not(:disabled) {
+  background: rgba(124, 58, 237, 0.16);
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+.save-bank-btn.saved {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--accent-green);
+  cursor: default;
 }
 
 /* Answer box */
@@ -277,7 +316,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: var(--text-main);
+  color: var(--text-primary);
   padding: 0.5rem 0.75rem;
   font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
@@ -287,12 +326,12 @@
 .edit-input:focus,
 .edit-textarea:focus {
   outline: none;
-  border-color: var(--accent-blue);
+  border-color: var(--accent-primary);
   background: rgba(255, 255, 255, 0.08);
 }
 
 .edit-select option {
-  background: var(--bg-dark);
+  background: var(--bg-secondary);
 }
 
 .topic-input {
@@ -315,6 +354,76 @@
   font-size: 0.9rem;
 }
 
+/* Variant tabs styling */
+.variant-tab-container {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.variant-tab-btn {
+  background: none;
+  border: none;
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.variant-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Standard = green */
+.variant-tab-btn:nth-child(1).active {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent-green);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+}
+
+/* Scaffolded = amber */
+.variant-tab-btn:nth-child(2).active {
+  background: rgba(245, 158, 11, 0.18);
+  color: #f59e0b;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+}
+
+/* Advanced = purple */
+.variant-tab-btn:nth-child(3).active {
+  background: rgba(124, 58, 237, 0.18);
+  color: #a78bfa;
+  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.2);
+}
+
+/* Edit form textarea groups */
+.edit-textarea-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.edit-textarea-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
 .add-question-wrap {
   display: flex;
   justify-content: center;
@@ -330,7 +439,7 @@
 .add-q-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.4);
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
 @media (max-width: 900px) {

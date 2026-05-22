@@ -14,8 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
-from generator import generate_paper, regenerate_question
-from schemas import GenerateRequest, GenerateResponse, RegenerateRequest, RegenerateResponse
+from generator import generate_paper, regenerate_question, parse_voice_command
+from schemas import GenerateRequest, GenerateResponse, RegenerateRequest, RegenerateResponse, VoiceCommandRequest
 
 # ── App setup ──────────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -47,10 +47,10 @@ async def generate(req: GenerateRequest):
     if not req.levels:
         raise HTTPException(status_code=400, detail="At least one Bloom's level required.")
     if not os.getenv("GOOGLE_API_KEY"):
-        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured.")
+        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured.")
 
     try:
-        result = await generate_paper(req.syllabus, req.levels)
+        result = await generate_paper(req.syllabus, req.levels, req.backlog_text)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
@@ -59,8 +59,8 @@ async def generate(req: GenerateRequest):
 # ── Regenerate single question ─────────────────────────────────────────────────
 @app.post("/api/regenerate", response_model=RegenerateResponse)
 async def regenerate(req: RegenerateRequest):
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY not configured.")
+    if not os.getenv("GOOGLE_API_KEY"):
+        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured.")
 
     try:
         question = await regenerate_question(
@@ -75,6 +75,21 @@ async def regenerate(req: RegenerateRequest):
         return RegenerateResponse(question=question)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Regeneration failed: {str(e)}")
+
+
+# ── Parse Voice Command ────────────────────────────────────────────────────────
+@app.post("/api/parse-voice-command")
+async def parse_voice(req: VoiceCommandRequest):
+    if not req.transcript.strip():
+        raise HTTPException(status_code=400, detail="Transcript cannot be empty.")
+    if not os.getenv("GOOGLE_API_KEY"):
+        raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured.")
+
+    try:
+        result = await parse_voice_command(req.transcript)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Voice parse failed: {str(e)}")
 
 
 # ── PDF text extraction ────────────────────────────────────────────────────────

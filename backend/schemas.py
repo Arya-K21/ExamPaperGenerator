@@ -15,6 +15,7 @@ class BloomLevel(BaseModel):
 class GenerateRequest(BaseModel):
     syllabus: str
     levels: List[BloomLevel]
+    backlog_text: Optional[str] = None
 
 
 class RegenerateRequest(BaseModel):
@@ -33,6 +34,8 @@ class Question(BaseModel):
     marks: int
     topic: str
     question: str
+    scaffolded_question: str
+    advanced_question: str
     answer: str
     rejected: bool = False
     rejectionReason: Optional[str] = None
@@ -64,3 +67,7 @@ class GenerateResponse(BaseModel):
 
 class RegenerateResponse(BaseModel):
     question: Question
+
+
+class VoiceCommandRequest(BaseModel):
+    transcript: str
